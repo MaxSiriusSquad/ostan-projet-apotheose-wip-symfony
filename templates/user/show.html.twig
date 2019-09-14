@@ -1,0 +1,160 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ user.username }}
+{% endblock %}
+
+
+{% block content %}
+<style>
+        .content{
+            margin: 1em auto;
+          
+            width: 100%;
+
+            }
+        
+    </style>
+    <div class="mask">
+        <a href="{{ path('user_show', { 'id': user.id }) }}">
+            <img src="{{ asset(picture_upload_path ~ (user.avatar ?: 'marvel.jpg')) }}" class="profil-avatar border border-dark">
+        </a>
+    </div>
+
+    <div class="profil-card text-center border border-dark mx-5 pt-5 px-5">
+
+        <div class="pt-5">
+            <h1 class="font-weight-bold">{{ user.username }}</h1>
+        </div>
+
+        <div class="border border-dark mx-5 my-5 py-3">
+            <p>
+                <span class="font-weight-bold">Adresse email :</span>
+                {{ user.email }}
+            </p>
+
+            <div>
+                {# Affichage du ou des job(s) de l'utilisateur #}
+                {% for job in user.jobs %}
+                    <p>
+                        <span class="font-weight-bold">Je suis :</span>
+                            {{ job.name }}
+                    </p>
+                {% endfor %}
+            </div>
+
+            <p>
+                <span class="font-weight-bold">Présentation :</span>
+            </p>
+
+            <p class="mx-5">{{ user.description }}</p>
+
+            <div class="d-flex justify-content-start ml-5 pt-3">
+                {# Affichage du ou des tag(s) de l'utilisateur #}
+                {% for tag in user.tags %}
+                    <p>
+                        <a href="{{ path('tag_show', {'id': tag.id }) }}" class="font-weight-bold btn btn-light border border-dark rounded-0 mr-2">{{ tag.name }}</a>
+                    </p>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-start ml-5 pt-2 font-italic">
+                <p>Membre depuis le
+                    {{ user.createdAt | date('d/m/Y à H:i') }}</p>
+            </div>
+        </div>
+
+        {% if user.id == app.user.id %}
+
+            <div class="my-2 d-flex justify-content-center">
+                <a href="{{ path('user_edit', {'id': app.user.id }) }}" class="btn btn-success">
+                    Modifier mon profil
+                </a>
+            </div>
+
+            <form method="post" action="{{ path('user_delete', {'id': app.user.id}) }}" onsubmit="return confirm('Etes vous sûr de vouloir supprimer cet user ?');">
+                <input type="hidden" name="_method" value="DELETE">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ app.user.id) }}">
+                <button class="btn btn-danger mb-4">Supprimer mon profil</button>
+            </form>
+
+        {% endif %}
+
+    </div>
+
+    <section class="d-flex flex-column">
+
+        <h5 class="card-title font-weight-bold mb-0 text-center">Galerie</h5>
+
+        <div class="card ml-5 my-3 pt-3 px-3 border border-dark">
+            {% for gallery in user.galleryPosts %}
+                <div class="card-body">
+                    <p class="card-text">{{gallery.title}}</p>
+                    <div
+                        class="container1">
+                        {# <a href="{{ path('user_show', { 'id': user.id }) }}"> #}
+                        <img
+                        src="{{ asset(picture_upload_path ~ (gallery.picture1 ?: 'marvel.jpg')) }}" class="img-fluid image-galerie modal-hover-opacity" style="max-width:100%;cursor:pointer" onclick="onClick(this)">
+                    {# </a> #}
+                    </div>
+                    <div
+                        class="container1">
+                        {# <a href="{{ path('user_show', { 'id': user.id }) }}"> #}
+                        <img
+                        src="{{ asset(picture_upload_path ~ (gallery.picture2 ?: 'marvel.jpg')) }}" class="img-fluid image-galerie modal-hover-opacity" style="max-width:100%;cursor:pointer" onclick="onClick(this)">
+                    {# </a> #}
+                    </div>
+                    <div
+                        class="container1">
+                        {# <a href="{{ path('user_show', { 'id': user.id }) }}"> #}
+                        <img
+                        src="{{ asset(picture_upload_path ~ (gallery.picture3 ?: 'marvel.jpg')) }}" class="img-fluid image-galerie modal-hover-opacity" style="max-width:100%;cursor:pointer" onclick="onClick(this)">
+                    {# </a> #}
+                    </div>
+                </div>
+                <div id="modal01" class="modal" onclick="this.style.display='none'">
+                    <span class="close">&times;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div class="modal-cont">
+                        <img id="img01" style="max-width:100%">
+                    </div>
+                </div>
+                <p class="card-text">{{gallery.description}}</p>
+                <p class="card-text font-italic text-muted">Posté par
+                    {{gallery.user}}
+                    le
+                    {{ gallery.createdAt | date('d/m/Y à H:i') }}</p>
+                <hr>
+            {% else %}
+                <p>Il n'y a pas de galeries pour le moment....</p>
+            {% endfor %}
+        </div>
+
+        {% if user.id == app.user.id %}
+            <div class="gallery-form">
+                {{ form_start(formGallery) }}
+                {{ form_row(formGallery.title) }}
+                {{ form_row(formGallery.picture1) }}
+                {{ form_row(formGallery.picture2) }}
+                {{ form_row(formGallery.picture3) }}
+                {{ form_row(formGallery.description) }}
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-light border border-dark rounded-0 mb-3 font-weight-bold">Envoyer</button>
+                </div>
+                {{ form_end(formGallery) }}
+            </div>
+        {% endif %}
+
+        <a class="text-dark mt-5 text-center" href="{{ path('advice_post')}}">Revenir à l'accueil</a>
+
+    </section>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function onClick(element) {
+            document.getElementById("img01").src = element.src;
+            document.getElementById("modal01").style.display = "block";
+        }
+    </script>
+{% endblock %}
